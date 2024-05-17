@@ -31,4 +31,4 @@ This project is a RESTful API for managing a list of users with customizable pro
 1. Clone the repository:
    ```bash
    git clone https://github.com/ShamsadAlam/User-List-Management-Backend.git
-   cd user-list-management
+   cd User-List-Management-Backend
