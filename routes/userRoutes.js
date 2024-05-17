@@ -1,21 +1,26 @@
 const express = require("express");
 const multer = require("multer");
 const csvParser = require("csv-parser");
+const fs = require("fs");
+const path = require("path");
 const List = require("../models/List");
 const User = require("../models/User");
-const fs = require("fs");
+
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
 router.post("/upload/:listId", upload.single("file"), async (req, res) => {
   const listId = req.params.listId;
   const list = await List.findById(listId);
+
   if (!list) {
     return res.status(404).json({ error: "List not found" });
   }
 
   const results = [];
-  fs.createReadStream(req.file.path)
+  const filePath = req.file.path;
+
+  fs.createReadStream(filePath)
     .pipe(csvParser())
     .on("data", (data) => results.push(data))
     .on("end", async () => {
@@ -52,12 +57,19 @@ router.post("/upload/:listId", upload.single("file"), async (req, res) => {
         }
       }
 
+      // Remove the uploaded file after processing
+      fs.unlinkSync(filePath);
+
       res.json({
         addedCount,
         errorCount,
         totalCount: await User.countDocuments({ list: listId }),
         errors,
       });
+    })
+    .on("error", (error) => {
+      console.error("Error reading the CSV file:", error);
+      res.status(500).json({ error: "Error reading the CSV file" });
     });
 });
 

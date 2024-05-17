@@ -6,10 +6,7 @@ require("dotenv").config();
 const app = express();
 app.use(bodyParser.json());
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect("mongodb://127.0.0.1:27017/userlist");
 
 const listRoutes = require("./routes/listRoutes");
 const userRoutes = require("./routes/userRoutes");
