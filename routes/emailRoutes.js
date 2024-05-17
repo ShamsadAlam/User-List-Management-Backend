@@ -1,10 +1,10 @@
+// routes/emailRoutes.js
 const express = require("express");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const router = express.Router();
 
 router.post("/send/:listId", async (req, res) => {
-  const { subject, body } = req.body;
   const listId = req.params.listId;
   const users = await User.find({ list: listId, unsubscribed: false });
 
@@ -17,16 +17,21 @@ router.post("/send/:listId", async (req, res) => {
   });
 
   for (const user of users) {
-    let personalizedBody = body;
-    for (const [key, value] of user.properties.entries()) {
-      personalizedBody = personalizedBody.replace(`[${key}]`, value);
-    }
+    const emailBody = `
+Hey ${user.name}!
+
+Thank you for signing up with your email ${
+      user.email
+    }. We have received your city as ${user.properties.get("city")}.
+
+Team MathonGo.
+        `;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject,
-      text: personalizedBody,
+      subject: "Welcome to MathonGo!",
+      text: emailBody,
     };
 
     try {
